@@ -4,7 +4,7 @@ An enhanced CycleGAN implementation for the Kaggle ["I'm Something of a Painter 
 
 **Public leaderboard score: 61.33 MiFID**
 
-![Training Loss Animation](assets/training_loss_animation2.gif)
+![Training Loss Animation](assets/training_loss_animation.gif)
 
 ## Sample Results
 
