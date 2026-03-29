@@ -21,19 +21,20 @@ An enhanced CycleGAN implementation for the Kaggle ["I'm Something of a Painter 
 - Instance Normalization throughout
 - Learns "delta" updates rather than full reconstruction
 
-**Discriminator:** Multi-scale PatchGAN
-- Two parallel PatchGAN networks (full-resolution + half-resolution via average pooling)
-- Each: Conv(64, ↓2) → Conv(128, ↓2) → Conv(256, ↓2) → Conv(512) → Conv(1) patch map
-- Intermediate features (x1, x2, x3) used for feature matching loss
+**Discriminator:** PatchGAN
+- Conv(64, ↓2) → Conv(128, ↓2) → Conv(256, ↓2) → Conv(512, stride 1) → Conv(1) patch map
+- 4x4 kernels, LeakyReLU, Instance Normalization from second layer onward
 
 ## Loss Functions
 
 ```
-L_G = L_adv_full + L_adv_half         (LSGAN adversarial, both scales)
-    + L_fm_full  + L_fm_half           (feature matching, w=10.0)
-    + L_cyc                            (cycle consistency, λ=7.0)
-    + L_id                             (identity, λ×0.1)
+L_G = L_adv + L_cyc + L_id
+
+L_adv = MSE(D(G(x)), 1)                              LSGAN adversarial
+L_cyc = 10.0 × (|x - F(G(x))| + |y - G(F(y))|)      Cycle consistency
+L_id  = 10.0 × 0.5 × (|y - G(y)| + |x - F(x)|)      Identity
 ```
+
 
 ## Training Details
 
@@ -41,22 +42,20 @@ L_G = L_adv_full + L_adv_half         (LSGAN adversarial, both scales)
 |---|---|
 | Image size | 256×256 |
 | Batch size | 4 |
-| Epochs | 40 |
+| Epochs | 25 |
+| Steps per epoch | 500 |
 | Optimizer | Adam (lr=2e-4, β₁=0.5) |
-| LR schedule | Constant 20 epochs, linear decay 20 epochs |
-| Replay buffer | 50 images, 50% swap probability |
-| Augmentation | Resize 286→crop 256, flip, brightness ±0.05, contrast/saturation ±5% |
-| Hardware | Tesla P100 (16GB) |
-| Training time | 4.5 hours |
-| Framework | TensorFlow 2.19 |
+| LR schedule | Constant |
+| Augmentation | Resize 286 → crop 256, horizontal flip |
+| Framework | TensorFlow 2.18 |
+| Output | 7,000 generated images |
 
 ## Key Implementation Choices
 
-- **LSGAN** over binary cross-entropy for stable gradients
+- **LSGAN** over binary cross-entropy for stable, informative gradients
 - **Instance Normalization** over Batch Normalization for per-image style independence
-- **Multi-scale discriminator** for both fine texture and global coherence pressure
-- **Feature matching loss** on intermediate discriminator layers (not just final output)
-- **Image replay buffer** to prevent discriminator forgetting
+- **Strong identity loss** (λ_id=0.5) to prevent unwanted color tinting
+- **Minimal augmentation** (spatial only, no color shifts) to let the generator learn Monet's palette
 - **Persistent gradient tape** for consistent updates across all four networks
 
 ## Run
@@ -80,6 +79,7 @@ A detailed writeup covering the architecture, loss functions, training dynamics,
 2. Mao et al. (2017). [Least Squares Generative Adversarial Networks](https://arxiv.org/abs/1611.04076)
 3. Isola et al. (2017). [Image-to-Image Translation with Conditional Adversarial Networks](https://arxiv.org/abs/1611.07004)
 4. Torbunov et al. (2023). [Rethinking CycleGAN: Improving Quality of GANs for Unpaired Image-to-Image Translation](https://arxiv.org/abs/2303.16280)
+5. Parmar, G., Park, T., Narasimhan, S., & Zhu, J.Y. (2024). [One-Step Image Translation with Text-to-Image Models](https://arXiv.org/abs/2403.12036)
 
 ## License
 
