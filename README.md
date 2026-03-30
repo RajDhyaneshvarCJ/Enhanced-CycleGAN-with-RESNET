@@ -71,7 +71,7 @@ Generates 7,000 Monet-style images and zips them for submission.
 
 ## Article
 
-A detailed writeup covering the architecture, loss functions, training dynamics, and what the training logs actually mean is available on [Medium](YOUR_MEDIUM_LINK).
+A detailed writeup covering the architecture, loss functions, training dynamics, and what the training logs actually mean is available on [Medium](https://medium.com/@dhyaneshmrthy/why-gans-are-hard-and-why-most-fail-quietly-80961a92c715).
 
 ## References
 
